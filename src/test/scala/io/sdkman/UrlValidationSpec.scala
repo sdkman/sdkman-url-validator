@@ -53,7 +53,7 @@ class UrlValidationSpec extends WordSpec with Matchers with BeforeAndAfter with 
         .willReturn(aResponse().withStatus(302).withHeader("Location", urlWith(finalUri))))
 
       stubFor(head(urlEqualTo(finalUri))
-        .withHeader(secureHeaderName, equalTo(secureHeaderValue))
+        .withCookie(secureHeaderName, equalTo(secureHeaderValue))
         .willReturn(aResponse().withStatus(200)))
 
       withClue("secured url should be reachable") {
