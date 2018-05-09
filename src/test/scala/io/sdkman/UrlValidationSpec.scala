@@ -46,18 +46,18 @@ class UrlValidationSpec extends WordSpec with Matchers with BeforeAndAfter with 
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
 
-      val secureHeaderName = "some_key"
-      val secureHeaderValue = "some_value"
+      val secureCookineName = "some_key"
+      val secureCookieValue = "some_value"
 
       stubFor(head(urlEqualTo(redirectUri))
         .willReturn(aResponse().withStatus(302).withHeader("Location", urlWith(finalUri))))
 
       stubFor(head(urlEqualTo(finalUri))
-        .withCookie(secureHeaderName, equalTo(secureHeaderValue))
+        .withCookie(secureCookineName, equalTo(secureCookieValue))
         .willReturn(aResponse().withStatus(200)))
 
       withClue("secured url should be reachable") {
-        hasOrphanedUrl(urlWith(redirectUri), Some(secureHeaderName -> secureHeaderValue)) shouldBe false
+        hasOrphanedUrl(urlWith(redirectUri), Some(Cookie(secureCookineName, secureCookieValue))) shouldBe false
       }
     }
 

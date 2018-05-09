@@ -5,13 +5,15 @@ import scalaj.http.HttpOptions.followRedirects
 
 import scala.util.Try
 
+case class Cookie(name: String, value: String)
+
 trait UrlValidation {
-  def hasOrphanedUrl(url: String, cookie: Option[(String, String)] = None): Boolean =
+  def hasOrphanedUrl(url: String, cookie: Option[Cookie] = None): Boolean =
     Try {
       val http = Http(url)
         .method("HEAD")
         .option(followRedirects(true))
-      cookie.fold(http)(c => http.cookie(c._1, c._2))
+      cookie.fold(http)(c => http.cookie(c.name, c.value))
         .asString
         .code
     }.fold(e => true, code => Seq(404, 403, 401).contains(code))
