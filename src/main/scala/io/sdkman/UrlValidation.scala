@@ -6,12 +6,12 @@ import scalaj.http.HttpOptions.followRedirects
 import scala.util.Try
 
 trait UrlValidation {
-  def hasOrphanedUrl(url: String, header: (String, String) = ("", "")): Boolean =
+  def hasOrphanedUrl(url: String, header: Option[(String, String)] = None): Boolean =
     Try {
-      Http(url)
+      val http = Http(url)
         .method("HEAD")
-        .headers(header)
         .option(followRedirects(true))
+      header.fold(http)(h => http.headers(h))
         .asString
         .code
     }.fold(e => true, code => Seq(404, 403, 401).contains(code))

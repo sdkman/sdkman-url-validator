@@ -57,7 +57,7 @@ class UrlValidationSpec extends WordSpec with Matchers with BeforeAndAfter with 
         .willReturn(aResponse().withStatus(200)))
 
       withClue("secured url should be reachable") {
-        hasOrphanedUrl(urlWith(redirectUri), secureHeaderName -> secureHeaderValue) shouldBe false
+        hasOrphanedUrl(urlWith(redirectUri), Some(secureHeaderName -> secureHeaderValue)) shouldBe false
       }
     }
 
