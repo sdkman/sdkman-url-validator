@@ -8,7 +8,6 @@ trait TestNetworking {
   self: BeforeAndAfter =>
 
   before {
-    println("resetting...")
     WireMock.reset()
   }
 
