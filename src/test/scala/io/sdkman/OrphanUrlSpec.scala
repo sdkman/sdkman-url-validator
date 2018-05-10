@@ -119,6 +119,19 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
+    "determine that a resource with no content is orphaned" in new UrlValidation {
+      val validUri = "/candidate/scala/1.2.3"
+
+      stubFor(get(urlEqualTo(validUri))
+        .willReturn(aResponse()
+          .withBody(new Array[Byte](0))
+          .withStatus(200)))
+
+      withClue("empty stream not orphaned") {
+        hasOrphanedUrl(urlWith(validUri)) shouldBe true
+      }
+    }
+
     "deterimine that a resource with unknown host is orphaned" in new UrlValidation {
       val unknownHostUrl = "http://unknown5f7c5b58a4e4e777654ad16bf641144c:9090"
 
