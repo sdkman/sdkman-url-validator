@@ -1,19 +1,12 @@
 package io.sdkman
 
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.{BeforeAndAfter, Matchers, WordSpec}
 import support.TestNetworking
 
-class UrlValidationSpec extends WordSpec with Matchers with BeforeAndAfter with TestNetworking {
+class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with TestNetworking {
 
-  WireMock.configureFor(WiremockHost, WiremockPort)
-
-  before {
-    WireMock.reset()
-  }
-
-  "url validation" should {
+  "hasOrphanUrl" should {
 
     "determine that a resource is not orphaned" in new UrlValidation {
       val validUri = "/candidates/scala/2.12.4"
@@ -120,7 +113,4 @@ class UrlValidationSpec extends WordSpec with Matchers with BeforeAndAfter with 
       }
     }
   }
-
-  def urlWith(uri: String) = s"http://$WiremockHost:$WiremockPort$uri"
-
 }
