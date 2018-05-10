@@ -8,9 +8,9 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
 
   val binary = "/jdk-8u111-linux64.tar.gz"
 
-  "hasOrphanUrl" should {
+  "resourceAvailable" should {
 
-    "determine that a resource is not orphaned" in new UrlValidation {
+    "determine that a resource is available" in new UrlValidation {
       val validUri = "/candidates/scala/2.12.4"
 
       stubFor(get(urlEqualTo(validUri))
@@ -19,12 +19,12 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withBodyFile(binary)
           .withStatus(200)))
 
-      withClue("valid url orphaned") {
-        hasOrphanedUrl(urlWith(validUri)) shouldBe false
+      withClue("valid url not available") {
+        resourceAvailable(urlWith(validUri)) shouldBe false
       }
     }
 
-    "determine that a resource redirecting to a valid uri is not orphaned" in new UrlValidation {
+    "determine that a resource redirecting to a valid uri is available" in new UrlValidation {
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
 
@@ -37,8 +37,8 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withBodyFile(binary)
           .withStatus(200)))
 
-      withClue("redirect to a valid uri orphaned") {
-        hasOrphanedUrl(urlWith(redirectUri)) shouldBe false
+      withClue("redirect to a valid uri not available") {
+        resourceAvailable(urlWith(redirectUri)) shouldBe false
       }
     }
 
@@ -60,7 +60,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withStatus(200)))
 
       withClue("secured url should be reachable") {
-        hasOrphanedUrl(urlWith(redirectUri), Some(Cookie(secureCookineName, secureCookieValue))) shouldBe false
+        resourceAvailable(urlWith(redirectUri), Some(Cookie(secureCookineName, secureCookieValue))) shouldBe false
       }
     }
 
@@ -76,7 +76,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
         .willReturn(aResponse().withStatus(403)))
 
       withClue("secured url should not be reachable") {
-        hasOrphanedUrl(urlWith(redirectUri)) shouldBe true
+        resourceAvailable(urlWith(redirectUri)) shouldBe true
       }
     }
 
@@ -90,8 +90,8 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       stubFor(get(urlEqualTo(finalUri))
         .willReturn(aResponse().withStatus(404)))
 
-      withClue("redirect to invalid uri not orphaned") {
-        hasOrphanedUrl(urlWith(redirectUri)) shouldBe true
+      withClue("redirect to invalid uri available") {
+        resourceAvailable(urlWith(redirectUri)) shouldBe true
       }
     }
 
@@ -102,24 +102,24 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       stubFor(get(urlEqualTo(redirectUri))
         .willReturn(aResponse().withStatus(302).withHeader("Location", unknownHostUrl)))
 
-      withClue("redirect to unknown host not orphaned") {
-        hasOrphanedUrl(urlWith(redirectUri)) shouldBe true
+      withClue("redirect to unknown host available") {
+        resourceAvailable(urlWith(redirectUri)) shouldBe true
       }
     }
 
-    "determine that a resource with invalid uri is orphaned" in new UrlValidation {
+    "determine that a resource with invalid uri is not available" in new UrlValidation {
       val invalidUri = "/candidates/scala/9.9.9"
 
       stubFor(get(urlEqualTo(invalidUri))
         .willReturn(aResponse()
           .withStatus(404)))
 
-      withClue("invalid uri not orphaned") {
-        hasOrphanedUrl(urlWith(invalidUri)) shouldBe true
+      withClue("invalid uri available") {
+        resourceAvailable(urlWith(invalidUri)) shouldBe true
       }
     }
 
-    "determine that a resource with no content is orphaned" in new UrlValidation {
+    "determine that a resource with no content is not available" in new UrlValidation {
       val validUri = "/candidate/scala/1.2.3"
 
       stubFor(get(urlEqualTo(validUri))
@@ -127,16 +127,16 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withBody(new Array[Byte](0))
           .withStatus(200)))
 
-      withClue("empty stream not orphaned") {
-        hasOrphanedUrl(urlWith(validUri)) shouldBe true
+      withClue("empty stream available") {
+        resourceAvailable(urlWith(validUri)) shouldBe true
       }
     }
 
-    "deterimine that a resource with unknown host is orphaned" in new UrlValidation {
+    "deterimine that a resource with unknown host is not available" in new UrlValidation {
       val unknownHostUrl = "http://unknown5f7c5b58a4e4e777654ad16bf641144c:9090"
 
-      withClue("unknown host not orphaned") {
-        hasOrphanedUrl(unknownHostUrl) shouldBe true
+      withClue("unknown host available") {
+        resourceAvailable(unknownHostUrl) shouldBe true
       }
     }
   }

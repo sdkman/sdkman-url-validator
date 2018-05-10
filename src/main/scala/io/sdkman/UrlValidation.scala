@@ -10,7 +10,7 @@ import scala.util.Try
 case class Cookie(name: String, value: String)
 
 trait UrlValidation {
-  def hasOrphanedUrl(url: String, cookie: Option[Cookie] = None): Boolean =
+  def resourceAvailable(url: String, cookie: Option[Cookie] = None): Boolean =
     resolvedStatusCode(url, cookie)
       .fold(e => true, code => Seq(404, 403, 401).contains(code))
 
