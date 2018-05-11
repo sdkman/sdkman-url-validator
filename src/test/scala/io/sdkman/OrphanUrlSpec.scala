@@ -20,7 +20,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withStatus(200)))
 
       withClue("valid url not available") {
-        resourceAvailable(urlWith(validUri)) shouldBe false
+        resourceAvailable(urlWith(validUri)) shouldBe true
       }
     }
 
@@ -38,7 +38,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withStatus(200)))
 
       withClue("redirect to a valid uri not available") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe false
+        resourceAvailable(urlWith(redirectUri)) shouldBe true
       }
     }
 
@@ -60,7 +60,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withStatus(200)))
 
       withClue("secured url should be reachable") {
-        resourceAvailable(urlWith(redirectUri), Some(Cookie(secureCookineName, secureCookieValue))) shouldBe false
+        resourceAvailable(urlWith(redirectUri), Some(Cookie(secureCookineName, secureCookieValue))) shouldBe true
       }
     }
 
@@ -76,7 +76,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
         .willReturn(aResponse().withStatus(403)))
 
       withClue("secured url should not be reachable") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe true
+        resourceAvailable(urlWith(redirectUri)) shouldBe false
       }
     }
 
@@ -91,7 +91,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
         .willReturn(aResponse().withStatus(404)))
 
       withClue("redirect to invalid uri available") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe true
+        resourceAvailable(urlWith(redirectUri)) shouldBe false
       }
     }
 
@@ -103,7 +103,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
         .willReturn(aResponse().withStatus(302).withHeader("Location", unknownHostUrl)))
 
       withClue("redirect to unknown host available") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe true
+        resourceAvailable(urlWith(redirectUri)) shouldBe false
       }
     }
 
@@ -115,7 +115,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withStatus(404)))
 
       withClue("invalid uri available") {
-        resourceAvailable(urlWith(invalidUri)) shouldBe true
+        resourceAvailable(urlWith(invalidUri)) shouldBe false
       }
     }
 
@@ -128,7 +128,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
           .withStatus(200)))
 
       withClue("empty stream available") {
-        resourceAvailable(urlWith(validUri)) shouldBe true
+        resourceAvailable(urlWith(validUri)) shouldBe false
       }
     }
 
@@ -136,7 +136,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       val unknownHostUrl = "http://unknown5f7c5b58a4e4e777654ad16bf641144c:9090"
 
       withClue("unknown host available") {
-        resourceAvailable(unknownHostUrl) shouldBe true
+        resourceAvailable(unknownHostUrl) shouldBe false
       }
     }
   }
