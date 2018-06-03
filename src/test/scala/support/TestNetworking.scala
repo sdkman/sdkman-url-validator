@@ -1,11 +1,20 @@
 package support
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import org.scalatest.BeforeAndAfter
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 
 trait TestNetworking {
 
-  self: BeforeAndAfter =>
+  self: BeforeAndAfter with BeforeAndAfterAll =>
+
+  lazy val wireMockServer = new WireMockServer(wireMockConfig().port(8080))
+
+
+  override def beforeAll(): Unit = wireMockServer.start()
+
+  override def afterAll(): Unit = wireMockServer.stop()
 
   before {
     WireMock.reset()
