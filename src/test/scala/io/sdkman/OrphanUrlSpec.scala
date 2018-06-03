@@ -1,30 +1,34 @@
 package io.sdkman
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import org.scalatest.{BeforeAndAfter, Matchers, WordSpec}
+import com.typesafe.scalalogging.LazyLogging
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
+import scalaj.http.Http
 import support.TestNetworking
 
-class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with TestNetworking {
+class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with BeforeAndAfterAll with TestNetworking {
 
-  val binary = "/jdk-8u111-linux64.tar.gz"
+  val binary = "jdk-8u111-linux64.tar.gz"
 
   "resourceAvailable" should {
 
-    "determine that a resource is available" in new UrlValidation {
+    "determine that a resource is available" in new TestValidation {
       val validUri = "/candidates/scala/2.12.4"
 
       stubFor(get(urlEqualTo(validUri))
         .willReturn(aResponse()
-          .withHeader("Content-Type", "application/zip")
+          .withHeader("content-type", "application/octet-stream")
           .withBodyFile(binary)
           .withStatus(200)))
+
+      println(Http(s"http://localhost:8080$validUri").asString.contentType)
 
       withClue("valid url not available") {
         resourceAvailable(urlWith(validUri)) shouldBe true
       }
     }
 
-    "determine that a resource redirecting to a valid uri is available" in new UrlValidation {
+    "determine that a resource redirecting to a valid uri is available" in new TestValidation {
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
 
@@ -42,7 +46,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
-    "determine that a secured redirecting resource can be reached" in new UrlValidation {
+    "determine that a secured redirecting resource can be reached" in new TestValidation {
 
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
@@ -64,7 +68,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
-    "determine that a secured redirecting resource can't be reached" in new UrlValidation {
+    "determine that a secured redirecting resource can't be reached" in new TestValidation {
 
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
@@ -80,7 +84,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
-    "determine that a resource redirects to a uri not found" in new UrlValidation {
+    "determine that a resource redirects to a uri not found" in new TestValidation {
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/invalid/url/scala/2.12.5"
 
@@ -95,7 +99,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
-    "determine that a resource redirects to an unknown host" in new UrlValidation {
+    "determine that a resource redirects to an unknown host" in new TestValidation {
       val redirectUri = "/redirect/scala/2.12.5"
       val unknownHostUrl = "http://unknown5f7c5b58a4e4e777654ad16bf641144c:9090"
 
@@ -107,7 +111,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
-    "determine that a resource with invalid uri is not available" in new UrlValidation {
+    "determine that a resource with invalid uri is not available" in new TestValidation {
       val invalidUri = "/candidates/scala/9.9.9"
 
       stubFor(get(urlEqualTo(invalidUri))
@@ -119,7 +123,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
-    "determine that a resource with no content is not available" in new UrlValidation {
+    "determine that a resource with no content is not available" in new TestValidation {
       val validUri = "/candidate/scala/1.2.3"
 
       stubFor(get(urlEqualTo(validUri))
@@ -132,7 +136,21 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
 
-    "deterimine that a resource with unknown host is not available" in new UrlValidation {
+    "determine that a resource with html content type is not available" in new TestValidation {
+      val validUri = "/candidate/java/10.0.1"
+
+      stubFor(get(urlEqualTo(validUri))
+        .willReturn(aResponse()
+          .withBody("<html>bogus</html>")
+          .withHeader("Content-Type", "text/html")
+          .withStatus(200)))
+
+      withClue("text/html available") {
+        resourceAvailable(urlWith(validUri)) shouldBe false
+      }
+    }
+
+    "deterimine that a resource with unknown host is not available" in new TestValidation {
       val unknownHostUrl = "http://unknown5f7c5b58a4e4e777654ad16bf641144c:9090"
 
       withClue("unknown host available") {
@@ -140,4 +158,6 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Test
       }
     }
   }
+
+  private class TestValidation extends UrlValidation with LazyLogging
 }
