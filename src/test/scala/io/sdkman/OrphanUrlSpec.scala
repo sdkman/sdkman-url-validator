@@ -157,6 +157,26 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
         resourceAvailable(unknownHostUrl) shouldBe false
       }
     }
+
+    "determine that a resource timed out beyond an acceptable timeframe" in new TestValidation {
+
+      override val connTimeout = 500
+
+      override val readTimeout = 500
+
+      val validUri = "/candidate/java/10.0.1"
+
+      stubFor(get(urlEqualTo(validUri))
+        .willReturn(aResponse()
+          .withFixedDelay(1000)
+          .withHeader("content-type", "application/octet-stream")
+          .withBodyFile(binary)
+          .withStatus(200)))
+
+      withClue("resource did not timeout") {
+        resourceAvailable(urlWith(validUri)) shouldBe false
+      }
+    }
   }
 
   private class TestValidation extends UrlValidation with LazyLogging

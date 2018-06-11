@@ -14,6 +14,10 @@ trait UrlValidation {
 
   self: LazyLogging =>
 
+  val connTimeout = 5000
+
+  val readTimeout = 10000
+
   def resourceAvailable(url: String, cookie: Option[Cookie] = None): Boolean =
     resolvedStatusCode(url, cookie) match {
       case Success(code) =>
@@ -29,6 +33,7 @@ trait UrlValidation {
       val http = Http(url)
         .method("GET")
         .option(followRedirects(true))
+        .timeout(connTimeout, readTimeout)
 
       val response = cookie
         .fold(http)(c => http.cookie(c.name, c.value))
