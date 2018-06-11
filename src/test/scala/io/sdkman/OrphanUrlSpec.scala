@@ -21,8 +21,6 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
           .withBodyFile(binary)
           .withStatus(200)))
 
-      println(Http(s"http://localhost:8080$validUri").asString.contentType)
-
       withClue("valid url not available") {
         resourceAvailable(urlWith(validUri)) shouldBe true
       }
