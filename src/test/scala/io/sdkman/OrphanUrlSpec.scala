@@ -60,6 +60,17 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       }
     }
 
+    "determine that secured resource cannot be reached" in new TestValidation {
+      val finalUri = "/finalurl/scala/2.12.5"
+
+      stubFor(get(urlEqualTo(finalUri))
+        .willReturn(aResponse().withStatus(403)))
+
+      withClue("secured url should be reachable") {
+        resourceAvailable(httpUrlWith(finalUri)) shouldBe false
+      }
+    }
+
     "determine that a resource redirects to a uri not found" in new TestValidation {
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/invalid/url/scala/2.12.5"
