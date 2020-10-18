@@ -9,8 +9,7 @@ trait TestNetworking {
 
   self: BeforeAndAfter with BeforeAndAfterAll =>
 
-  lazy val wireMockServer = new WireMockServer(wireMockConfig().port(8080))
-
+  lazy val wireMockServer = new WireMockServer(wireMockConfig().port(WiremockHttpPort))
 
   override def beforeAll(): Unit = wireMockServer.start()
 
@@ -21,7 +20,7 @@ trait TestNetworking {
   }
 
   val WiremockHost = "localhost"
-  val WiremockPort = 8080
+  val WiremockHttpPort = 8080
 
   val MongoHost = "localhost"
   val MongoPort = 27017
@@ -29,8 +28,8 @@ trait TestNetworking {
   val GreenmailHost = "localhost"
   val GreenmailPort = 3143
 
-  WireMock.configureFor(WiremockHost, WiremockPort)
+  WireMock.configureFor(WiremockHost, WiremockHttpPort)
 
-  def urlWith(uri: String) = s"http://$WiremockHost:$WiremockPort$uri"
+  def httpUrlWith(uri: String) = s"http://$WiremockHost:$WiremockHttpPort$uri"
 
 }

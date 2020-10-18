@@ -22,16 +22,16 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
           .withStatus(200)))
 
       withClue("valid url not available") {
-        resourceAvailable(urlWith(validUri)) shouldBe true
+        resourceAvailable(httpUrlWith(validUri)) shouldBe true
       }
     }
 
-    "determine that a resource redirecting to a valid uri is available" in new TestValidation {
+    "determine that a resource redirecting to a valid url is available" in new TestValidation {
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
 
       stubFor(get(urlEqualTo(redirectUri))
-        .willReturn(aResponse().withStatus(302).withHeader("Location", urlWith(finalUri))))
+        .willReturn(aResponse().withStatus(302).withHeader("Location", httpUrlWith(finalUri))))
 
       stubFor(get(urlEqualTo(finalUri))
         .willReturn(aResponse()
@@ -40,29 +40,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
           .withStatus(200)))
 
       withClue("redirect to a valid uri not available") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe true
-      }
-    }
-
-    "determine that a secured redirecting resource can be reached" in new TestValidation {
-
-      val redirectUri = "/redirect/scala/2.12.5"
-      val finalUri = "/finalurl/scala/2.12.5"
-
-      val secureCookineName = "some_key"
-      val secureCookieValue = "some_value"
-
-      stubFor(get(urlEqualTo(redirectUri))
-        .willReturn(aResponse().withStatus(302).withHeader("Location", urlWith(finalUri))))
-
-      stubFor(get(urlEqualTo(finalUri))
-        .willReturn(aResponse()
-          .withHeader("Content-Type", "application/zip")
-          .withBodyFile(binary)
-          .withStatus(200)))
-
-      withClue("secured url should be reachable") {
-        resourceAvailable(urlWith(redirectUri), Some(Cookie(secureCookineName, secureCookieValue))) shouldBe true
+        resourceAvailable(httpUrlWith(redirectUri)) shouldBe true
       }
     }
 
@@ -72,13 +50,13 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       val finalUri = "/finalurl/scala/2.12.5"
 
       stubFor(get(urlEqualTo(redirectUri))
-        .willReturn(aResponse().withStatus(302).withHeader("Location", urlWith(finalUri))))
+        .willReturn(aResponse().withStatus(302).withHeader("Location", httpUrlWith(finalUri))))
 
       stubFor(get(urlEqualTo(finalUri))
         .willReturn(aResponse().withStatus(403)))
 
       withClue("secured url should not be reachable") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe false
+        resourceAvailable(httpUrlWith(redirectUri)) shouldBe false
       }
     }
 
@@ -87,13 +65,13 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       val finalUri = "/invalid/url/scala/2.12.5"
 
       stubFor(get(urlEqualTo(redirectUri))
-        .willReturn(aResponse().withStatus(302).withHeader("Location", urlWith(finalUri))))
+        .willReturn(aResponse().withStatus(302).withHeader("Location", httpUrlWith(finalUri))))
 
       stubFor(get(urlEqualTo(finalUri))
         .willReturn(aResponse().withStatus(404)))
 
       withClue("redirect to invalid uri available") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe false
+        resourceAvailable(httpUrlWith(redirectUri)) shouldBe false
       }
     }
 
@@ -105,7 +83,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
         .willReturn(aResponse().withStatus(302).withHeader("Location", unknownHostUrl)))
 
       withClue("redirect to unknown host available") {
-        resourceAvailable(urlWith(redirectUri)) shouldBe false
+        resourceAvailable(httpUrlWith(redirectUri)) shouldBe false
       }
     }
 
@@ -117,7 +95,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
           .withStatus(404)))
 
       withClue("invalid uri available") {
-        resourceAvailable(urlWith(invalidUri)) shouldBe false
+        resourceAvailable(httpUrlWith(invalidUri)) shouldBe false
       }
     }
 
@@ -130,7 +108,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
           .withStatus(200)))
 
       withClue("empty stream available") {
-        resourceAvailable(urlWith(validUri)) shouldBe false
+        resourceAvailable(httpUrlWith(validUri)) shouldBe false
       }
     }
 
@@ -144,11 +122,11 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
           .withStatus(200)))
 
       withClue("text/html available") {
-        resourceAvailable(urlWith(validUri)) shouldBe false
+        resourceAvailable(httpUrlWith(validUri)) shouldBe false
       }
     }
 
-    "deterimine that a resource with unknown host is not available" in new TestValidation {
+    "determine that a resource with unknown host is not available" in new TestValidation {
       val unknownHostUrl = "http://unknown5f7c5b58a4e4e777654ad16bf641144c:9090"
 
       withClue("unknown host available") {
@@ -172,7 +150,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
           .withStatus(200)))
 
       withClue("resource did not timeout") {
-        resourceAvailable(urlWith(validUri)) shouldBe false
+        resourceAvailable(httpUrlWith(validUri)) shouldBe false
       }
     }
   }
