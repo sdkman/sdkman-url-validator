@@ -8,8 +8,6 @@ import scalaj.http.HttpOptions.followRedirects
 
 import scala.util.{Failure, Success, Try}
 
-case class Cookie(name: String, value: String)
-
 trait UrlValidation {
 
   self: LazyLogging =>
@@ -18,8 +16,8 @@ trait UrlValidation {
 
   val readTimeout = 10000
 
-  def resourceAvailable(url: String, cookie: Option[Cookie] = None): Boolean =
-    resolvedStatusCode(url, cookie) match {
+  def resourceAvailable(url: String): Boolean =
+    resolvedStatusCode(url) match {
       case Success(code) =>
         logger.info(s"URL $url responded with code: $code")
         !Seq(404, 403, 401, 500).contains(code)
@@ -28,15 +26,12 @@ trait UrlValidation {
         false
     }
 
-  def resolvedStatusCode(url: String, cookie: Option[Cookie] = None): Try[Int] =
+  def resolvedStatusCode(url: String): Try[Int] =
     Try {
-      val http = Http(url)
+      val response = Http(url)
         .method("GET")
         .option(followRedirects(true))
         .timeout(connTimeout, readTimeout)
-
-      val response = cookie
-        .fold(http)(c => http.cookie(c.name, c.value))
         .execute(sampleStream)
 
       response.contentType match {
