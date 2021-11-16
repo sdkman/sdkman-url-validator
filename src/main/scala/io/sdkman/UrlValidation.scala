@@ -1,7 +1,5 @@
 package io.sdkman
 
-import java.io.{InputStream, PushbackInputStream}
-
 import com.typesafe.scalalogging.LazyLogging
 import scalaj.http.Http
 import scalaj.http.HttpOptions.followRedirects
@@ -29,10 +27,10 @@ trait UrlValidation {
   def resolvedStatusCode(url: String): Try[Int] =
     Try {
       val response = Http(url)
-        .method("GET")
+        .method("HEAD")
         .option(followRedirects(true))
         .timeout(connTimeout, readTimeout)
-        .execute(sampleStream)
+        .asParamMap
 
       response.contentType match {
         case ct if isTextHtml(ct) =>
@@ -44,9 +42,4 @@ trait UrlValidation {
 
   private def isTextHtml(s: Option[String]): Boolean = s.exists(ct => ct.contains("text/html"))
 
-  private def sampleStream(is: InputStream): Unit = {
-    val pbis = new PushbackInputStream(is)
-    val b1 = pbis.read()
-    if (b1 == -1) throw new IllegalStateException("Could not read from input stream.") else pbis.unread(b1)
-  }
 }

@@ -15,7 +15,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
     "determine that a resource is available" in new TestValidation {
       val validUri = "/candidates/scala/2.12.4"
 
-      stubFor(get(urlEqualTo(validUri))
+      stubFor(head(urlEqualTo(validUri))
         .willReturn(aResponse()
           .withHeader("content-type", "application/octet-stream")
           .withBodyFile(binary)
@@ -30,10 +30,10 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
 
-      stubFor(get(urlEqualTo(redirectUri))
+      stubFor(head(urlEqualTo(redirectUri))
         .willReturn(aResponse().withStatus(302).withHeader("Location", httpUrlWith(finalUri))))
 
-      stubFor(get(urlEqualTo(finalUri))
+      stubFor(head(urlEqualTo(finalUri))
         .willReturn(aResponse()
           .withHeader("Content-Type", "application/zip")
           .withBodyFile(binary)
@@ -49,10 +49,10 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/finalurl/scala/2.12.5"
 
-      stubFor(get(urlEqualTo(redirectUri))
+      stubFor(head(urlEqualTo(redirectUri))
         .willReturn(aResponse().withStatus(302).withHeader("Location", httpUrlWith(finalUri))))
 
-      stubFor(get(urlEqualTo(finalUri))
+      stubFor(head(urlEqualTo(finalUri))
         .willReturn(aResponse().withStatus(403)))
 
       withClue("secured url should not be reachable") {
@@ -63,7 +63,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
     "determine that secured resource cannot be reached" in new TestValidation {
       val finalUri = "/finalurl/scala/2.12.5"
 
-      stubFor(get(urlEqualTo(finalUri))
+      stubFor(head(urlEqualTo(finalUri))
         .willReturn(aResponse().withStatus(403)))
 
       withClue("secured url should be reachable") {
@@ -75,10 +75,10 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       val redirectUri = "/redirect/scala/2.12.5"
       val finalUri = "/invalid/url/scala/2.12.5"
 
-      stubFor(get(urlEqualTo(redirectUri))
+      stubFor(head(urlEqualTo(redirectUri))
         .willReturn(aResponse().withStatus(302).withHeader("Location", httpUrlWith(finalUri))))
 
-      stubFor(get(urlEqualTo(finalUri))
+      stubFor(head(urlEqualTo(finalUri))
         .willReturn(aResponse().withStatus(404)))
 
       withClue("redirect to invalid uri available") {
@@ -90,7 +90,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       val redirectUri = "/redirect/scala/2.12.5"
       val unknownHostUrl = "http://unknown5f7c5b58a4e4e777654ad16bf641144c:9090"
 
-      stubFor(get(urlEqualTo(redirectUri))
+      stubFor(head(urlEqualTo(redirectUri))
         .willReturn(aResponse().withStatus(302).withHeader("Location", unknownHostUrl)))
 
       withClue("redirect to unknown host available") {
@@ -101,7 +101,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
     "determine that a resource with invalid uri is not available" in new TestValidation {
       val invalidUri = "/candidates/scala/9.9.9"
 
-      stubFor(get(urlEqualTo(invalidUri))
+      stubFor(head(urlEqualTo(invalidUri))
         .willReturn(aResponse()
           .withStatus(404)))
 
@@ -110,23 +110,10 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
       }
     }
 
-    "determine that a resource with no content is not available" in new TestValidation {
-      val validUri = "/candidate/scala/1.2.3"
-
-      stubFor(get(urlEqualTo(validUri))
-        .willReturn(aResponse()
-          .withBody(new Array[Byte](0))
-          .withStatus(200)))
-
-      withClue("empty stream available") {
-        resourceAvailable(httpUrlWith(validUri)) shouldBe false
-      }
-    }
-
     "determine that a resource with html content type is not available" in new TestValidation {
       val validUri = "/candidate/java/10.0.1"
 
-      stubFor(get(urlEqualTo(validUri))
+      stubFor(head(urlEqualTo(validUri))
         .willReturn(aResponse()
           .withBody("<html>bogus</html>")
           .withHeader("Content-Type", "text/html")
@@ -153,7 +140,7 @@ class OrphanUrlSpec extends WordSpec with Matchers with BeforeAndAfter with Befo
 
       val validUri = "/candidate/java/10.0.1"
 
-      stubFor(get(urlEqualTo(validUri))
+      stubFor(head(urlEqualTo(validUri))
         .willReturn(aResponse()
           .withFixedDelay(1000)
           .withHeader("content-type", "application/octet-stream")
